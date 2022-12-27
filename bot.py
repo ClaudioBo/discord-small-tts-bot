@@ -1,3 +1,4 @@
+import asyncio
 import os
 
 import discord
@@ -17,6 +18,7 @@ intents.message_content = True
 is_ready = False
 
 bot = commands.Bot(command_prefix="*", intents=intents)
+channel_id = int(os.getenv("CHANNEL_ID"))
 
 
 @bot.event
@@ -33,8 +35,9 @@ async def on_message(message):
         return
 
     ctx = await bot.get_context(message)
-    
-    if ctx.channel.id != 978057613554098257:
+
+    global channel_id
+    if ctx.channel.id != channel_id:
         return
 
     text = message.content
@@ -49,7 +52,7 @@ async def on_message(message):
     if not text:
         print(f"Ao {ctx.author.mention}, give me something to say first!")
         return
-    
+
     if not utils.check_text(text):
         return
 
@@ -67,8 +70,8 @@ async def on_message(message):
         vc.play(discord.FFmpegPCMAudio(file_name))
         vc.source = discord.PCMVolumeTransformer(vc.source)
         vc.source.volume = 1
-    finally:
-        pass
+    except:
+        await message.add_reaction("🙅‍♂️")
 
 
 @bot.command(name="disconnect")
@@ -81,10 +84,12 @@ async def disconnect(ctx):
     await vc.disconnect()
     print("I have left the voice channel, bb")
 
+
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, CommandNotFound):
         return
     raise error
+
 
 bot.run(os.getenv("DISCORD_TOKEN"))
