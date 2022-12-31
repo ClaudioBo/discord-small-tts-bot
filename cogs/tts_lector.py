@@ -70,10 +70,14 @@ class TTSLector(commands.Cog):
         if not engine in tts.available_voices:
             with Connection() as db:
                 db.set_user_voice(ctx.message.author.id, "tiktok", "es_mx_002")
+            engine = "tiktok"
+            voice = "es_mx_002"
 
         if not voice in [uno[0] for uno in tts.available_voices[engine]]:
             with Connection() as db:
                 db.set_user_voice(ctx.message.author.id, "tiktok", "es_mx_002")
+            engine = "tiktok"
+            voice = "es_mx_002"
 
         # Ejecutar modulo dependiendo del motor
         if engine == "tiktok":
