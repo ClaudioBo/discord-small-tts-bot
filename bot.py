@@ -1,7 +1,8 @@
-import asyncio
+import base64
 import os
 
 import discord
+import requests
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound
 from dotenv import load_dotenv
@@ -17,7 +18,7 @@ intents.message_content = True
 
 is_ready = False
 
-bot = commands.Bot(command_prefix="*", intents=intents)
+bot = commands.Bot(command_prefix="|", intents=intents)
 channel_id = int(os.getenv("CHANNEL_ID"))
 
 
@@ -61,18 +62,44 @@ async def on_message(message):
         return
 
     vc = await utils.connect_vc_of_author(ctx)
-
-    file_name = "tts.mp3"
-    tts = gTTS(text=text, lang="es", tld="com.mx", slow=True)
-    tts.save(file_name)
+    # generate_gtts(text)
+    if not generate_tiktok(text):
+        await message.add_reaction("💀")
+        return
 
     try:
-        vc.play(discord.FFmpegPCMAudio(file_name))
+        vc.play(discord.FFmpegPCMAudio("tts.mp3"))
         vc.source = discord.PCMVolumeTransformer(vc.source)
         vc.source.volume = 1
     except:
         await message.add_reaction("🙅‍♂️")
 
+def generate_gtts(text):
+    tts = gTTS(text=text, lang="es", tld="com.mx", slow=True)
+    tts.save("tts.mp3")
+
+def generate_tiktok(text):
+    voice = "es_mx_002"
+    text = text.replace("+", "mas")
+    text = text.replace(" ", "+")
+    text = text.replace("&", "y")
+
+    headers = {
+        'User-Agent': 'com.zhiliaoapp.musically/2022600030 (Linux; U; Android 7.1.2; es_ES; SM-G988N; Build/NRD90M;tt-ok/3.12.13.1)',
+        'Cookie': f'sessionid={os.getenv("TIKTOK_SESSIONID")}'
+    }
+    url = f"https://api16-normal-useast5.us.tiktokv.com/media/api/text/speech/invoke/?text_speaker={voice}&req_text={text}&speaker_map_type=0&aid=1233"
+
+    r = requests.post(url, headers=headers)
+    if r.json()["message"] == "Couldn't load speech. Try again.":
+        return False
+    
+    vstr = [r.json()["data"]["v_str"]][0]
+    b64d = base64.b64decode(vstr)
+    with open("tts.mp3", "wb") as out:
+        out.write(b64d)
+
+    return True
 
 @bot.command(name="disconnect")
 async def disconnect(ctx):
