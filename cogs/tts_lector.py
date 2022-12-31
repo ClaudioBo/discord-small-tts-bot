@@ -9,7 +9,7 @@ class TTSLector(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.current_idle_time = None
-        self.max_idle_time = 10
+        self.max_idle_time = 60*30
         self.idle_tick.start()
 
     def cog_unload(self):
