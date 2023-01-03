@@ -140,7 +140,7 @@ class TTSLector(commands.Cog):
                 try:
                     self.voice_client.play(discord.FFmpegPCMAudio(current_mp3), after=self.after_play)
                     self.voice_client.source = discord.PCMVolumeTransformer(self.voice_client.source)
-                    self.voice_client.source.volume = 0.1
+                    self.voice_client.source.volume = 1
                 except:
                     print(f"[ERROR] No se pudo reproducir {current_mp3}:")
                     traceback.print_exc()
