@@ -56,14 +56,14 @@ available_voices = {
 }
 
 
-def generate_gtts(language: str, text):
+def generate_gtts(language: str, text, nombre_archivo):
     lang, tld = language.split(".", 1)
     tts = gTTS(text=text, lang=lang, tld=tld)
-    tts.save("tts.mp3")
+    tts.save(nombre_archivo)
 
 
 # Thanks for the tiktok voices: https://github.com/oscie57/tiktok-voice
-def generate_tiktok(session_id, text, voice="es_mx_002"):
+def generate_tiktok(session_id, text, nombre_archivo, voice="es_mx_002"):
     text = text.replace("+", "mas")
     text = text.replace(" ", "+")
     text = text.replace("&", "y")
@@ -71,8 +71,8 @@ def generate_tiktok(session_id, text, voice="es_mx_002"):
     headers = {"User-Agent": "com.zhiliaoapp.musically/2022600030 (Linux; U; Android 7.1.2; es_ES; SM-G988N; Build/NRD90M;tt-ok/3.12.13.1)", "Cookie": f"sessionid={session_id}"}
     url = f"https://api16-normal-useast5.us.tiktokv.com/media/api/text/speech/invoke/?text_speaker={voice}&req_text={text}&speaker_map_type=0&aid=1233"
 
-    r = requests.post(url, headers=headers)
     try:
+        r = requests.post(url, headers=headers)
         if r.json()["message"] == "Couldn't load speech. Try again.":
             return False
     except:
@@ -80,7 +80,7 @@ def generate_tiktok(session_id, text, voice="es_mx_002"):
 
     vstr = [r.json()["data"]["v_str"]][0]
     b64d = base64.b64decode(vstr)
-    with open("tts.mp3", "wb") as out:
+    with open(nombre_archivo, "wb") as out:
         out.write(b64d)
 
     return True
