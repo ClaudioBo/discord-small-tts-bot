@@ -51,7 +51,15 @@ class TTSLector(commands.Cog):
             vc = ctx.voice_client
             if vc:
                 await vc.disconnect()
-            await ctx.send(f"{ctx.author.mention}, bueno me calló pues 😠")
+            await ctx.send(f"{ctx.author.mention}, bueno ignoro {len(self.audio_queue)} mensajes y me calló pues 😠")
+
+            self.is_deletable = False
+            for aud in self.audio_queue:
+                try:
+                    os.remove(aud)
+                except :
+                    pass
+            self.audio_queue = []
             return
 
         # Pre-condicion: No hay texto
@@ -129,9 +137,15 @@ class TTSLector(commands.Cog):
 
             if not self.voice_client.is_playing():
                 if self.is_deletable:
-                    self.audio_queue.pop(0)
+                    try:
+                        self.audio_queue.pop(0)
+                    except:
+                        pass
                     self.is_deletable = False
-                    os.remove(current_mp3)
+                    try:
+                        os.remove(current_mp3)
+                    except:
+                        pass
 
                 if not self.audio_queue:
                     continue
